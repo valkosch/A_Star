@@ -4,7 +4,7 @@
 
 typedef struct Edge{
     void *p0, *p1;
-    double length, speed;
+    double length, time;
 } Edge;
 
 typedef struct Node{

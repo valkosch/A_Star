@@ -3,6 +3,7 @@
 #include <math.h>
 #include "debugmalloc.h"
 #include "pathfinder.h"
+#include "beolvasas.h"
 
 
 
@@ -38,12 +39,21 @@ int main() {
     e.p[1].p1 = &d;
 
     Node tomb[] ={a, c, d, e};
+    int nodeNum;
+    Node *test = NodeInput(&nodeNum);
+    EdgeInput(test, &nodeNum);
     List openSet = {NULL, NULL};
     List closedSet = {NULL, NULL};
     List path = {NULL, NULL};
     Pathfinder(&a, &e, &openSet, &closedSet, tomb);
     retrace(&path, &a, &e);
 
+
+    /*SetStart(&test[0], &test[50]);
+    Pathfinder(&test[0], &test[50], &openSet, &closedSet, test);
+    retrace(&path, &test[0], &test[50]);*/
+
+    FreeNodes(nodeNum, test);
     DeleteList(&path);
     DeleteList(&openSet);
     DeleteList(&closedSet);

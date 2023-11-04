@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "linkedlist.h"
 #include "graphElements.h"
+#include "debugmalloc.h"
 
 bool Contains(List *list, Node *data){
     ListCell y;
@@ -17,29 +18,32 @@ bool Contains(List *list, Node *data){
 
 ListCell *addToListSpec(List *list, Node *newData, ListCell *temp) {
     temp = malloc(sizeof(ListCell));
-    temp->next = NULL;
     temp->data = *newData;
-
-    if (list->last != NULL)
-        list->last->next = temp;
-    else
-        list->first = temp;
-
+    temp->next = NULL;
     temp->previous = list->last;
+
+    if (list->last == NULL){
+        list->first = temp;
+    }
+    else{
+        list->last->next = temp;
+    }
+
     list->last = temp;
     return temp;
 }
 void addToList(List *list, Node *newData) {
     ListCell *temp = (ListCell*)malloc(sizeof(ListCell));
-    temp->next = NULL;
     temp->data = *newData;
-
-    if (list->last != NULL)
-        list->last->next = temp;
-    else
-        list->first = temp;
-
+    temp->next = NULL;
     temp->previous = list->last;
+
+    if (list->last == NULL){
+        list->first = temp;
+    }
+    else{
+        list->last->next = temp;
+    }
     list->last = temp;
 }
 int Count(List *list){
@@ -53,19 +57,21 @@ int Count(List *list){
     return x;
 }
 void removeFromList(List *list, ListCell *toRemove) {
-    if (toRemove != list->first)
-        toRemove->previous->next = toRemove->next;
-    else
-        list->first = toRemove->next;
-
-    if (toRemove != list->last)
-        toRemove->next->previous = toRemove->previous;
-    else
+    if (toRemove == list->last){
         list->last = toRemove->previous;
-
+    }
+    else{
+        toRemove->next->previous = toRemove->previous;
+    }
+    if (toRemove == list->first){
+        list->first = toRemove->next;
+    }
+    else{
+        toRemove->previous->next = toRemove->next;
+    }
     free(toRemove);
 }
 void DeleteList(List *list) {
-    while (list->first != NULL)
+    while (list->last != NULL)
         removeFromList(list, list->first);
 }

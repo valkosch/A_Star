@@ -3,6 +3,7 @@
 #include "linkedlist.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 void retrace(List *path, Node *start, Node *end){
     Node seged = *end;
@@ -30,7 +31,6 @@ void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSe
         }
         removeFromList(openSet, currentP);
         currentP = addToListSpec(closedSet, &currentNode, currentP);
-
         printf("%f %f\n", currentNode.x, currentNode.y);
         if(currentNode.x == targetNode->x && currentNode.y == targetNode->y){
             return;
@@ -53,4 +53,8 @@ void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSe
             }
         }
     }
+}
+void SetStart(Node *startNode, Node *targetNode){
+    startNode->gCost = 0;
+    startNode ->hCost = hCost(startNode, targetNode);
 }

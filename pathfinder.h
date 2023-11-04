@@ -7,5 +7,5 @@
 #include "graphElements.h"
 void retrace(List *path, Node *start, Node *end);
 void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb);
-
+void SetStart(Node *startNode, Node *targetNode);
 #endif //ASTAR_PATHFINDER_H
