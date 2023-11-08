@@ -5,14 +5,6 @@
 #include <stdio.h>
 #include <math.h>
 
-void retrace(List *path, Node *start, Node *end){
-    Node seged = *end;
-    while(seged.parent != NULL){
-        addToList(path, &seged);
-        seged = *seged.parent;
-    }
-    addToList(path, start);
-}
 void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb){
     ListCell *currentP;
     Node currentNode;
@@ -31,7 +23,6 @@ void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSe
         }
         removeFromList(openSet, currentP);
         currentP = addToListSpec(closedSet, &currentNode, currentP);
-        printf("%f %f\n", currentNode.x, currentNode.y);
         if(currentNode.x == targetNode->x && currentNode.y == targetNode->y){
             return;
             //cél elérve : return

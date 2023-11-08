@@ -6,7 +6,20 @@
 
 FILE* edges;
 FILE* nodes;
+mapInfo mapI;
 
+mapInfo GetMapI(void){
+    return mapI;
+}
+void mapItNodes(Node *tomb, int const *l){
+    double relX = mapI.east - mapI.west;
+    double relY = mapI.north - mapI.south;
+    for(int i = 0; i < *l; ++i){
+        tomb[i].x = mapI.imgWidth*((tomb[i].x - mapI.west)/relX);
+        tomb[i].y= mapI.imgHeight*((mapI.north -tomb[i].y)/relY);
+
+    }
+}
 void NodeInit(Node *a){
     a->hCost=INT_MAX;
     a->gCost=INT_MAX;
@@ -19,13 +32,17 @@ void FreeNodes(int l, Node *t){
     free(t);
 }
 Node *NodeInput(int *nodeNum){
-    nodes = fopen("C:\\Users\\bandi\\CLionProjects\\Astar\\datas\\nodes.txt", "r");
-    edges = fopen("C:\\Users\\bandi\\CLionProjects\\Astar\\datas\\edges.txt", "r");
+    nodes = fopen("C:\\Users\\Lenovo\\Documents\\iskola\\Astar_terkep\\datas\\nodes.txt", "r");
+    edges = fopen("C:\\Users\\Lenovo\\Documents\\iskola\\Astar_terkep\\datas\\edges.txt", "r");
     Node *tomb;
 
     if (nodes != NULL) {
         fscanf(nodes, "%d", nodeNum);
         tomb = (Node*) malloc(*nodeNum*sizeof(Node));
+        fscanf(nodes, "%lf %lf %lf %lf", &mapI.north, &mapI.south, &mapI.east, &mapI.west);
+        mapI.imgHeight = 810;
+        mapI.imgWidth = 1361;
+
         char tmp[256];
         int degreeSum[*nodeNum];
         if(edges != NULL){
@@ -43,7 +60,7 @@ Node *NodeInput(int *nodeNum){
             }
         }
         else{
-            perror("Nem sikerült megnyitni a fájlt");
+            perror("Nem sikerült megnyitni az éleket tartalmazó fájlt");
         }
         int id;
         while(fgets(tmp, 256, nodes)) {
@@ -53,19 +70,20 @@ Node *NodeInput(int *nodeNum){
                 tomb[id].fokszam = degreeSum[id];
                 tomb[id].p = (Edge*) malloc(degreeSum[id]*sizeof(Edge));
             }
-            sscanf(tmp,"<data key=\"d5\">%lf</data>", &tomb[id].x);
-            sscanf(tmp,"<data key=\"d6\">%lf</data>", &tomb[id].y);
+            sscanf(tmp,"<data key=\"d5\">%lf</data>", &tomb[id].y);
+            sscanf(tmp,"<data key=\"d6\">%lf</data>", &tomb[id].x);
         }
+        fclose(edges);
     }
     else {
         tomb = NULL;
-        perror("Nem sikerült megnyitni a fájlt");
+        perror("Nem sikerült megnyitni a pontokat tartalmazó fájlt");
     }
     fclose(nodes);
     return tomb;
 }
 void EdgeInput(Node *tomb, int const *m){
-    edges = fopen("C:\\Users\\bandi\\CLionProjects\\Astar\\datas\\edges.txt", "r");
+    edges = fopen("C:\\Users\\Lenovo\\Documents\\iskola\\Astar_terkep\\datas\\edges.txt", "r");
 
     if(edges != NULL){
         char tmp[256];
@@ -94,7 +112,7 @@ void EdgeInput(Node *tomb, int const *m){
         }
     }
     else{
-        perror("Nem sikerült megnyitni a fájlt");
+        perror("Nem sikerült megnyitni az éleket tartalmazó fájlt");
     }
     fclose(edges);
 }
