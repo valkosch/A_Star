@@ -5,6 +5,8 @@
 
 #include "linkedlist.h"
 #include "graphElements.h"
-void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb);
-void SetStart(Node *startNode, Node *targetNode);
+void PathfinderS(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb);
+void PathfinderF(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb);
+void SetStartS(Node *startNode, Node *targetNode);
+void SetStartF(Node *startNode, Node *targetNode);
 #endif //ASTAR_PATHFINDER_H

@@ -2,6 +2,7 @@
 #include "beolvasas.h"
 #include "debugmalloc.h"
 #include <stdlib.h>
+#include <limits.h>
 #include "graphElements.h"
 
 FILE* edges;
@@ -32,16 +33,16 @@ void FreeNodes(int l, Node *t){
     free(t);
 }
 Node *NodeInput(int *nodeNum){
-    nodes = fopen("C:\\Users\\Lenovo\\Documents\\iskola\\Astar_terkep\\datas\\nodes.txt", "r");
-    edges = fopen("C:\\Users\\Lenovo\\Documents\\iskola\\Astar_terkep\\datas\\edges.txt", "r");
+    nodes = fopen("datas/nodes1.txt", "r");
+    edges = fopen("datas/edges1.txt", "r");
     Node *tomb;
 
     if (nodes != NULL) {
         fscanf(nodes, "%d", nodeNum);
         tomb = (Node*) malloc(*nodeNum*sizeof(Node));
         fscanf(nodes, "%lf %lf %lf %lf", &mapI.north, &mapI.south, &mapI.east, &mapI.west);
-        mapI.imgHeight = 810;
-        mapI.imgWidth = 1361;
+        mapI.imgHeight = 746;   
+        mapI.imgWidth = 1356;
 
         char tmp[256];
         int degreeSum[*nodeNum];
@@ -51,10 +52,8 @@ Node *NodeInput(int *nodeNum){
                 degreeSum[i] = 0;
             }
             while(fgets(tmp, 256, edges)){
-                if(sscanf(tmp, "<data key=\"d24\">%d</data>", &a)==1){
+                if(sscanf(tmp, "<edge source=\"%d\" target=\"%d\" id=\"%*d\">", &a, &b)==2){
                     degreeSum[a]++;
-                }
-                if(sscanf(tmp, "<data key=\"d25\">%d</data>", &b)==1){
                     degreeSum[b]++;
                 }
             }
@@ -83,11 +82,12 @@ Node *NodeInput(int *nodeNum){
     return tomb;
 }
 void EdgeInput(Node *tomb, int const *m){
-    edges = fopen("C:\\Users\\Lenovo\\Documents\\iskola\\Astar_terkep\\datas\\edges.txt", "r");
+    edges = fopen("datas/edges1.txt", "r");
 
     if(edges != NULL){
         char tmp[256];
         int EdgesIndex[*m];
+        char *str;
         int a, b;
         double c, d;
         for (int i = 0; i < *m; ++i) {
@@ -95,19 +95,15 @@ void EdgeInput(Node *tomb, int const *m){
         }
         while(fgets(tmp, 256, edges)){
             sscanf(tmp, "<edge source=\"%d\" target=\"%d\" id=\"%*d\">", &a, &b);
-            if(sscanf(tmp, "<data key=\"d18\">%lf</data>", &c) == 1){
+            if(sscanf(tmp, "<data key=\"d12\">%lf</data>", &c) == 1){
                 tomb[a].p[EdgesIndex[a]].length = c;
                 tomb[b].p[EdgesIndex[b]].length = c;
             }
-            if(sscanf(tmp, "<data key=\"d20\">%lf</data>", &d)==1){
+            if(sscanf(tmp, "<data key=\"d13\">%lf</data>", &d)==1){
                 tomb[a].p[EdgesIndex[a]].time = d;
                 tomb[b].p[EdgesIndex[b]].time = d;
-            }
-            if(sscanf(tmp, "<data key=\"d24\">%d</data>", &b)==1){
-                tomb[b].p[EdgesIndex[b]++].p1 = &tomb[a];
-            }
-            if(sscanf(tmp, "<data key=\"d25\">%d</data>", &a)==1){
                 tomb[a].p[EdgesIndex[a]++].p1 = &tomb[b];
+                tomb[b].p[EdgesIndex[b]++].p1 = &tomb[a];
             }
         }
     }

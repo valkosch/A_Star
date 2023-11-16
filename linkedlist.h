@@ -13,7 +13,7 @@ typedef struct List {
     ListCell *first, *last;
 } List;
 bool Contains(List *list, Node *data);
-ListCell *addToListSpec(List *list, Node *newData, ListCell *temp);
+void addToListSpec(List *list, Node *newData, ListCell **temp);
 void addToList(List *list, Node *newData);
 int Count(List *list);
 void removeFromList(List *list, ListCell *toRemove);

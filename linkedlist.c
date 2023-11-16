@@ -16,21 +16,20 @@ bool Contains(List *list, Node *data){
     return false;
 }
 
-ListCell *addToListSpec(List *list, Node *newData, ListCell *temp) {
-    temp = malloc(sizeof(ListCell));
-    temp->data = *newData;
-    temp->next = NULL;
-    temp->previous = list->last;
+ void addToListSpec(List *list, Node *newData, ListCell **temp) {
+    *temp = (ListCell*)malloc(sizeof(ListCell));
+    (*temp)->data = *newData;
+    (*temp)->next = NULL;
+    (*temp)->previous = list->last;
 
     if (list->last == NULL){
-        list->first = temp;
+        list->first = *temp;
     }
     else{
-        list->last->next = temp;
+        list->last->next = *temp;
     }
 
-    list->last = temp;
-    return temp;
+    list->last = *temp;
 }
 void addToList(List *list, Node *newData) {
     ListCell *temp = (ListCell*)malloc(sizeof(ListCell));
