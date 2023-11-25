@@ -3,50 +3,46 @@
 #include <stdbool.h>
 #include <math.h>
 #include "debugmalloc.h"
-#include "pathfinder.h"
-#include "beolvasas.h"
-#include "output.h"
+#include "states.h"
 
-void FindNearest_Node(int clickX, int clickY, Node *mainArray, int nodeNum, Node **A){
-    Node *res;
-    double min = sqrt(pow(clickX-mainArray[0].x,2) + pow(clickY-mainArray[0].y,2));
-    for (int i = 0; i < nodeNum; i++)
-    {
-        double tmp = sqrt(pow(clickX-mainArray[i].x,2) + pow(clickY-mainArray[i].y,2));
-        if(min > tmp){
-            res = &mainArray[i];
-            min = tmp;
-        }
-    }
-    *A = res;
-}
+
 int main(int argc, char *argv[]) {
+    NodeTomb mainArray;
+    NodeInput(&mainArray);
+    EdgeInput(&mainArray);
+    mapItNodes(&mainArray);
 
-    int nodeNum;
-    Node *mainArray = NodeInput(&nodeNum);
-    EdgeInput(mainArray, &nodeNum);
-    mapItNodes(mainArray, &nodeNum);
     mapInfo mapI = GetMapI();
-
     List openSet = {NULL, NULL};
     List closedSet = {NULL, NULL};
-    Node *StartNode;
-    Node *EndNode;
-
-    /* ablak letrehozasa */
+    Node *StartNode = NULL;
+    Node *EndNode = NULL;
+    Vector2 StartClick;
+    Vector2 EndClick;
+    mapType map = NORM;
+    ClickState State = FROM;
     SDL_Window *window;
     SDL_Renderer *renderer;
-    Button buttons[3] = {
-        {.to = {.x = mapI.imgWidth +  25, .y = 100, .w = 200, .h = 60}, .Bcolor = {.r = 211, .g = 211, .b = 211}, .Tcolor = {.r = 0, .g = 0, .b = 0}, .str = "gyors"},
-        {.to = {.x = mapI.imgWidth +  275, .y = 100, .w = 200, .h = 60}, .Bcolor = {.r = 211, .g = 211, .b = 211}, .Tcolor = {.r = 0, .g = 0, .b = 0}, .str = "rovid"},
-        {.to = {.x = mapI.imgWidth +  275, .y = mapI.imgHeight-85, .w = 200, .h = 60}, .Bcolor = {.r = 255, .g = 0, .b = 0}, .Tcolor = {.r = 255, .g = 255, .b = 255}, .str = "GO"},
+    Button buttons[4] = {
+        {.to = {.x = mapI.imgWidth +  10, .y = 200, .w = 235, .h = 60}, .Bcolor = grey, .Tcolor = black, .str = "Leggyorsabb út", .t=FASTEST, .power =false},
+        {.to = {.x = mapI.imgWidth +  260, .y = 200, .w = 230, .h = 60}, .Bcolor = grey, .Tcolor = black, .str = "Legrövidebb út", .t= SHORTEST, .power =false},
+        {.to = {.x = mapI.imgWidth +  275, .y = mapI.imgHeight-85, .w = 200, .h = 60}, .Bcolor = purple, .Tcolor = white, .str = "GO-->>>", .t=GO, .power =false},
+        {.to = {.x = mapI.imgWidth -90, .y = mapI.imgHeight-90, .w = 80, .h = 80}, .Bcolor = white, .Tcolor = white, .str = "", .t=ICON, .power =false}
     };
+
+
     sdl_init("Pathfinder", mapI.imgWidth+500, mapI.imgHeight, &window, &renderer);
-    RenderMap(renderer);
-    boxRGBA(renderer, mapI.imgWidth, mapI.imgHeight, mapI.imgWidth + 500, 0,  255, 255, 255, 255);
-    
+    RenderMap(renderer, map);
+    boxRGBA(renderer, mapI.imgWidth, 0, mapI.imgWidth + 500, mapI.imgHeight,  255, 255, 255, 255);
+    RenderLogo(renderer);
+
     TTF_Init();
-    TTF_Font *font = TTF_OpenFont("datas/ProductSans-Regular.ttf", 32);
+    TTF_Font *font = TTF_OpenFont("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/ProductSans-Regular.ttf", 25);
+    Text info = {.to = {.x = mapI.imgWidth +  10, .y = 270, .w = 0, .h = 0}, .color = black, .str = "Forgalom mentesen az út hossza és ideje:"};
+    RenderText(renderer, font, info.color,&info.to,info.str );
+    TTF_CloseFont(font);
+
+    font = TTF_OpenFont("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/ProductSans-Regular.ttf", 32);
     if (!font) {
         SDL_Log("Nem sikerult megnyitni a fontot! %s\n", TTF_GetError());
         exit(1);
@@ -55,66 +51,123 @@ int main(int argc, char *argv[]) {
     {
         RenderButtonWText(renderer,font, buttons[i]);
     }
-    
+
+    RenderButtonIcon(renderer, buttons[3], map);
     bool quit = false;
-    int x = 0;
     while (!quit) {
         SDL_Event event;
         SDL_WaitEvent(&event);
 
         switch (event.type) {
-            /* eger kattintas */
-            case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= mapI.imgWidth) {
-                    switch (x)
-                    {
-                    case 0:
-                        FindNearest_Node(event.button.x,event.button.y,mainArray,nodeNum, &StartNode);
-                        filledCircleRGBA(renderer, event.button.x, event.button.y, 4, 255, 0, 0, 255);
-                        SDL_RenderPresent(renderer);
-                        thickLineRGBA(renderer, StartNode->x, StartNode->y, event.button.x, event.button.y, 5, 0, 0, 255, 255);
-                        break;
-                    case 1:
-                        FindNearest_Node(event.button.x,event.button.y,mainArray,nodeNum, &EndNode);
-                        filledCircleRGBA(renderer, event.button.x, event.button.y, 4, 255, 0, 0, 255);
-                        SDL_RenderPresent(renderer);
-                        thickLineRGBA(renderer, EndNode->x, EndNode->y, event.button.x, event.button.y, 5, 0, 0, 255, 255);
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                else if (event.button.button == SDL_BUTTON_RIGHT) {
-                    x = 0;
-                    for(int i = 0; i< nodeNum; i++){
-                        NodeInit(&mainArray[i]);
-                    }
-                    DeleteList(&openSet);
-                    DeleteList(&closedSet);
-                    RenderMap(renderer);
-                }
-                break;
             /* egergomb elengedese */
             case SDL_MOUSEBUTTONUP:
-                if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= mapI.imgWidth) {
-                    switch (x)
-                    {
-                    case 0:
-                        x++;
-                        break;
-                    case 1:
-                        SetStartS(StartNode, EndNode);
-                        PathfinderS(StartNode, EndNode, &openSet, &closedSet, mainArray);
-                        retraceDraw(StartNode, EndNode, renderer);
-                        filledCircleRGBA(renderer, StartNode->x, StartNode->y, 4, 255, 0, 0, 255);
-                        filledCircleRGBA(renderer, EndNode->x, EndNode->y, 4, 255, 0, 0, 255);
-                        SDL_RenderPresent(renderer);
-                        x++;
-                        break;
-                    default:
-                        break;
-                    }
+                if(event.button.button == SDL_BUTTON_RIGHT) {
+                    State = FROM;
+                    RenderMap(renderer, map);
+                    RenderButtonIcon(renderer, buttons[3], map);
+                    boxRGBA(renderer, mapI.imgWidth, 310, mapI.imgWidth + 500, mapI.imgHeight-90,  255, 255, 255, 255);
+                    SDL_RenderPresent(renderer);
+                    InitPathfinding(&mainArray, &openSet, &closedSet);
                 }
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    if(event.button.x <= mapI.imgWidth && !CheckButtonClick(&buttons[ICON], &event)){
+                        switch (State)
+                        {
+                        case FROM:
+                            SelectNode(renderer, &event,&StartNode, &StartClick, &mainArray);
+                            State = TO;
+                            break;
+                        case TO:
+                            SelectNode(renderer, &event,&EndNode, &EndClick, &mainArray);
+                            State = WAIT;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    else if(CheckButtonClick(&buttons[SHORTEST], &event)){
+                        ButtonEffect(renderer, &buttons[SHORTEST], font);
+                    }
+                    else if(CheckButtonClick(&buttons[FASTEST], &event)){
+                        ButtonEffect(renderer, &buttons[FASTEST], font);
+                    }
+                    else if(CheckButtonClick(&buttons[GO], &event)&& State == WAIT){
+                        RenderMap(renderer, map);
+                        boxRGBA(renderer, mapI.imgWidth, 310, mapI.imgWidth + 500, mapI.imgHeight-90,  255, 255, 255, 255);
+                        filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
+                        filledCircleRGBA(renderer, EndClick.x, EndClick.y, 4, 255, 0, 0, 255);
+                        RenderButtonIcon(renderer, buttons[3], map);
+                        
+                        if(buttons[SHORTEST].power){
+                            SetStart(StartNode, EndNode, SHORTEST);
+                            Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, SHORTEST);
+                            retraceDraw(StartNode, EndNode, renderer ,blue, font);
+                            InitPathfinding(&mainArray, &openSet, &closedSet);
+                        }
+                        if(buttons[FASTEST].power){
+                            SetStart(StartNode, EndNode, FASTEST);
+                            Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, FASTEST);
+                            retraceDraw(StartNode, EndNode, renderer, red, font);
+                            InitPathfinding(&mainArray, &openSet, &closedSet);
+                        }
+                        if(buttons[FASTEST].power || buttons[SHORTEST].power){
+                            thickLineRGBA(renderer, EndNode->x, EndNode->y, EndClick.x, EndClick.y, 5, 0, 0, 0, 255);
+                            thickLineRGBA(renderer, StartNode->x, StartNode->y, StartClick.x, StartClick.y, 5, 0, 0, 0, 255);
+                            filledCircleRGBA(renderer, StartNode->x, StartNode->y, 4, 255, 0, 0, 255);
+                            filledCircleRGBA(renderer, EndNode->x, EndNode->y, 4, 255, 0, 0, 255);
+                            SDL_RenderPresent(renderer);
+                        }
+                        buttons[GO].power =true;
+                        RenderButtonIcon(renderer, buttons[3], map);
+                    }
+                    else if(CheckButtonClick(&buttons[ICON], &event)){
+                        if(map == SAT){
+                            map = NORM;
+                        }
+                        else{
+                            map = SAT;
+                        }
+                        RenderMap(renderer, map);
+                        RenderButtonIcon(renderer, buttons[3], map);
+                        switch (State)
+                        {
+                            case TO:
+                                filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
+                                SDL_RenderPresent(renderer);
+                                break;
+                            case WAIT:
+                                filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
+                                filledCircleRGBA(renderer, EndClick.x, EndClick.y, 4, 255, 0, 0, 255);
+                                SDL_RenderPresent(renderer);
+                                if(buttons[GO].power){
+                                    if(buttons[SHORTEST].power){
+                                    SetStart(StartNode, EndNode, SHORTEST);
+                                    Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, SHORTEST);
+                                    retraceDraw(StartNode, EndNode, renderer ,blue, font);
+                                    InitPathfinding(&mainArray, &openSet, &closedSet);
+                                    }
+                                    if(buttons[FASTEST].power){
+                                        SetStart(StartNode, EndNode, FASTEST);
+                                        Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, FASTEST);
+                                        retraceDraw(StartNode, EndNode, renderer, red, font);
+                                        InitPathfinding(&mainArray, &openSet, &closedSet);
+                                    }
+                                    if(buttons[FASTEST].power || buttons[SHORTEST].power){
+                                        thickLineRGBA(renderer, EndNode->x, EndNode->y, EndClick.x, EndClick.y, 5, 0, 0, 0, 255);
+                                        thickLineRGBA(renderer, StartNode->x, StartNode->y, StartClick.x, StartClick.y, 5, 0, 0, 0, 255);
+                                        filledCircleRGBA(renderer, StartNode->x, StartNode->y, 4, 255, 0, 0, 255);
+                                        filledCircleRGBA(renderer, EndNode->x, EndNode->y, 4, 255, 0, 0, 255);
+                                        SDL_RenderPresent(renderer);
+                                    }
+                                    RenderButtonIcon(renderer, buttons[3], map);
+                                }
+                                break;
+                            
+                            default:
+                                break;
+                        }
+                    }
+                } 
                 break;
             /* ablak bezarasa */
             case SDL_QUIT:
@@ -122,9 +175,7 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-
-    printf("\nstart: %d, end: %d", StartNode->index, EndNode->index);
-    FreeNodes(nodeNum, mainArray);
+    FreeNodes(&mainArray);
     DeleteList(&openSet);
     DeleteList(&closedSet);
     TTF_CloseFont(font);

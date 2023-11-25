@@ -4,9 +4,9 @@
 #define ASTAR_PATHFINDER_H
 
 #include "linkedlist.h"
-#include "graphElements.h"
-void PathfinderS(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb);
-void PathfinderF(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb);
-void SetStartS(Node *startNode, Node *targetNode);
-void SetStartF(Node *startNode, Node *targetNode);
+#include "output.h"
+
+void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb, ButtonType type);
+void SetStart(Node *startNode, Node *targetNode, ButtonType type);
+void FindNearest_Node(int clickX, int clickY, NodeTomb *mainArray, Node **A);
 #endif //ASTAR_PATHFINDER_H

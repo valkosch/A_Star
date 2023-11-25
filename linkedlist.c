@@ -45,6 +45,12 @@ void addToList(List *list, Node *newData) {
     }
     list->last = temp;
 }
+void addToListVector(Vector2Cell **list, Vector2Double *newData) {
+    Vector2Cell *temp = (Vector2Cell*)malloc(sizeof(Vector2Cell));
+    temp->data = *newData;
+    temp->next = *list;
+    *list = temp;
+}
 int Count(List *list){
     int x = 0;
     ListCell y;
@@ -73,4 +79,11 @@ void removeFromList(List *list, ListCell *toRemove) {
 void DeleteList(List *list) {
     while (list->last != NULL)
         removeFromList(list, list->first);
+}
+void DeleteListVector(Vector2Cell *list) {
+    while(list != NULL){
+        Vector2Cell *mozgo = list->next;
+        free(list);
+        list = mozgo;
+    }
 }
