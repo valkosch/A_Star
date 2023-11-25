@@ -17,7 +17,7 @@ void RenderText(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, SDL_Rec
 
     hova->w = felirat->w;
     hova->h = felirat->h;
-    
+
     SDL_RenderCopy(renderer, felirat_t, NULL, hova);
     SDL_RenderPresent(renderer);
     SDL_FreeSurface(felirat);
@@ -36,7 +36,7 @@ void timeofJourney(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, doub
         hova.x = mapI.imgWidth + 10;
         hova.y = 310;
         break;
-    
+
     default:
         hova.x = mapI.imgWidth + 260;
         hova.y = 310;
@@ -57,7 +57,7 @@ void lengthofJourney(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, do
         hova.x = mapI.imgWidth + 10;
         hova.y = 360;
         break;
-    
+
     default:
         hova.x = mapI.imgWidth + 260;
         hova.y = 360;
@@ -95,7 +95,7 @@ void RenderButtonWText(SDL_Renderer *renderer, TTF_Font *font, Button bt){
     roundedBoxRGBA(renderer, bt.to.x-2, bt.to.y-2, bt.to.x + bt.to.w+2, bt.to.y + bt.to.h+2,10 , 0, 0, 0 , 255);
     roundedBoxRGBA(renderer, bt.to.x, bt.to.y, bt.to.x + bt.to.w, bt.to.y + bt.to.h,10 , bt.Bcolor.r, bt.Bcolor.g, bt.Bcolor.b, bt.Bcolor.a);
 
-    
+
     SDL_Rect hova = { 0, 0, 0, 0 };
     hova.x = bt.to.x + bt.to.w/20;
     hova.y = bt.to.y + bt.to.h/6;
@@ -107,10 +107,10 @@ void RenderButtonIcon(SDL_Renderer *renderer, Button bt, mapType a){
     switch (a)
     {
         case NORM:
-            icon = IMG_LoadTexture(renderer, "/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/sat_icon.png");
+            icon = IMG_LoadTexture(renderer, "sat_icon.png");
             break;
         case SAT:
-            icon = IMG_LoadTexture(renderer, "/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/map_icon.png");
+            icon = IMG_LoadTexture(renderer, "map_icon.png");
             break;
     }
     if (icon == NULL) {
@@ -149,10 +149,10 @@ void RenderMap(SDL_Renderer *renderer, mapType a){
     switch (a)
     {
         case NORM:
-            map = IMG_LoadTexture(renderer, "/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/map.png");
+            map = IMG_LoadTexture(renderer, "map.png");
             break;
         case SAT:
-            map = IMG_LoadTexture(renderer, "/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/sat.png");
+            map = IMG_LoadTexture(renderer, "sat.png");
             break;
     }
     if (map == NULL) {
@@ -166,7 +166,7 @@ void RenderMap(SDL_Renderer *renderer, mapType a){
     SDL_DestroyTexture(map);
 }
 void RenderLogo(SDL_Renderer *renderer){
-    SDL_Texture *img = IMG_LoadTexture(renderer, "/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/logo1.png");
+    SDL_Texture *img = IMG_LoadTexture(renderer, "logo1.png");
      if (img == NULL) {
             SDL_Log("Nem nyithato meg a kepfajl: %s", IMG_GetError());
             SDL_DestroyTexture(img);

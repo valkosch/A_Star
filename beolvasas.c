@@ -20,37 +20,49 @@ void XYconvert(double *x, double *y){
 
     *x = mapI.imgWidth*((*x - mapI.west)/relX);
     *y = mapI.imgHeight*((mapI.north -*y)/relY);
-    
+
 }
 void mapItNodes(NodeTomb *mainArray){
-    for(int i = 0; i < mainArray->NodeNum; ++i){ 
+    for(int i = 0; i < mainArray->NodeNum; ++i){
         XYconvert(&mainArray->nodes[i].x, &mainArray->nodes[i].y);
     }
 }
 void LineString(Vector2Cell **list0, Vector2Cell **list1, char* str){
     Vector2Double tmp;
-    FILE *buffer = fmemopen(str, strlen(str), "r");
-    while(fscanf(buffer, "%lf %lf", &tmp.x, &tmp.y)==2){
-        XYconvert(&tmp.x, &tmp.y);
-        addToListVector(list0, &tmp);
-        addToListVector(list1, &tmp);
-        if(tmp.x > mapI.imgWidth || tmp.y > mapI.imgHeight){
-            printf("%ld\n",strlen(str));
+    int i = 0;
+    double a;
+    char *end;
+    while((a = strtod(str, &end))!=0){
+        if(i%2 == 0){
+            tmp.x = a;
         }
+        else{;
+            tmp.y = a;
+            XYconvert(&tmp.x, &tmp.y);
+            addToListVector(list0, &tmp);
+            addToListVector(list1, &tmp);
+        }
+        i++;
+        str = end;
     }
-    fclose(buffer);
 }
 void LineStringSpec(Vector2Cell **list0, char* str){
     Vector2Double tmp;
-    FILE *buffer = fmemopen(str, strlen(str), "r");
-    while(fscanf(buffer, "%lf %lf", &tmp.x, &tmp.y)==2){
-        XYconvert(&tmp.x, &tmp.y);
-        addToListVector(list0, &tmp);
-        if(tmp.x > mapI.imgWidth || tmp.y > mapI.imgHeight){
-            printf("%ld\n",strlen(str));
+    int i = 0;
+    double a;
+    char *end;
+    while((a = strtod(str, &end))!=0){
+        if(i%2 == 0){
+            tmp.x = a;
         }
+        else{
+            tmp.y = a;
+            XYconvert(&tmp.x, &tmp.y);
+            addToListVector(list0, &tmp);
+        }
+        i++;
+        str = end;
     }
-    fclose(buffer);
 }
 void NodeInit(Node *a){
     a->hCost=INT_MAX;
@@ -67,14 +79,14 @@ void FreeNodes(NodeTomb *mainArray){
     free(mainArray->nodes);
 }
 void NodeInput(NodeTomb *mainArray){
-    nodes = fopen("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/nodes1.txt", "r");
-    edges = fopen("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/edges1.txt", "r");
+    nodes = fopen("nodes1.txt", "r");
+    edges = fopen("edges1.txt", "r");
 
     if (nodes != NULL) {
         fscanf(nodes, "%d", &mainArray->NodeNum);
         mainArray->nodes = (Node*) malloc(mainArray->NodeNum*sizeof(Node));
         fscanf(nodes, "%lf %lf %lf %lf", &mapI.north, &mapI.south, &mapI.east, &mapI.west);
-        mapI.imgHeight = 746;   
+        mapI.imgHeight = 746;
         mapI.imgWidth = 1356;
 
         char tmp[256];
@@ -119,7 +131,8 @@ void NodeInput(NodeTomb *mainArray){
     fclose(nodes);
 }
 void EdgeInput(NodeTomb *mainArray){
-    edges = fopen("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/edges1.txt", "r");
+    edges = fopen("edges1.txt", "r");
+    edges = fopen("edges1.txt", "r");
 
     if(edges != NULL){
         char tmp[2000];

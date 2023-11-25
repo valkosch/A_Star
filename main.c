@@ -37,12 +37,12 @@ int main(int argc, char *argv[]) {
     RenderLogo(renderer);
 
     TTF_Init();
-    TTF_Font *font = TTF_OpenFont("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/ProductSans-Regular.ttf", 25);
+    TTF_Font *font = TTF_OpenFont("ProductSans-Regular.ttf", 25);
     Text info = {.to = {.x = mapI.imgWidth +  10, .y = 270, .w = 0, .h = 0}, .color = black, .str = "Forgalom mentesen az út hossza és ideje:"};
     RenderText(renderer, font, info.color,&info.to,info.str );
     TTF_CloseFont(font);
 
-    font = TTF_OpenFont("/home/valbra/Dokumentumok/iskola/prog/Astar/build/datas/ProductSans-Regular.ttf", 32);
+    font = TTF_OpenFont("ProductSans-Regular.ttf", 32);
     if (!font) {
         SDL_Log("Nem sikerult megnyitni a fontot! %s\n", TTF_GetError());
         exit(1);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
                         filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
                         filledCircleRGBA(renderer, EndClick.x, EndClick.y, 4, 255, 0, 0, 255);
                         RenderButtonIcon(renderer, buttons[3], map);
-                        
+
                         if(buttons[SHORTEST].power){
                             SetStart(StartNode, EndNode, SHORTEST);
                             Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, SHORTEST);
@@ -162,12 +162,12 @@ int main(int argc, char *argv[]) {
                                     RenderButtonIcon(renderer, buttons[3], map);
                                 }
                                 break;
-                            
+
                             default:
                                 break;
                         }
                     }
-                } 
+                }
                 break;
             /* ablak bezarasa */
             case SDL_QUIT:
