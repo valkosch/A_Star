@@ -8,5 +8,5 @@
 
 void Pathfinder(Node *startNode, Node *targetNode, List *openSet, List *closedSet, Node *tomb, ButtonType type);
 void SetStart(Node *startNode, Node *targetNode, ButtonType type);
-void FindNearest_Node(int clickX, int clickY, NodeTomb *mainArray, Node **A);
+void FindNearest_Node(int clickX, int clickY, NodeTomb *mainArray, Node **B);
 #endif //ASTAR_PATHFINDER_H

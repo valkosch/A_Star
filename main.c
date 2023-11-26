@@ -5,21 +5,23 @@
 #include "debugmalloc.h"
 #include "states.h"
 
-
+/* a main vezérli az adatstruktúrát (inicializálja,feltölti,továbbadja,törli)*/
 int main(int argc, char *argv[]) {
+    /*gráf pontok és élek tömbjeihez tartozó függvények meghívása*/
     NodeTomb mainArray;
     NodeInput(&mainArray);
     EdgeInput(&mainArray);
     mapItNodes(&mainArray);
 
-    mapInfo mapI = GetMapI();
-    List openSet = {NULL, NULL};
+    
+    mapInfo mapI = GetMapI(); /*térkép adottságait eltároló var*/
+    List openSet = {NULL, NULL}; /*A* müködéséhez fontos 2 lista*/
     List closedSet = {NULL, NULL};
-    Node *StartNode = NULL;
+    Node *StartNode = NULL;/*kezdő és végpont(útkereszteződés) amik között keressük az útvonalat*/
     Node *EndNode = NULL;
-    Vector2 StartClick;
+    Vector2 StartClick;/*felhasználó kattintásainak helyei a képernyőn*/
     Vector2 EndClick;
-    mapType map = NORM;
+    mapType map = NORM; /*enumok az állapotok egyszerűbb kezeléséért*/
     ClickState State = FROM;
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -30,12 +32,13 @@ int main(int argc, char *argv[]) {
         {.to = {.x = mapI.imgWidth -90, .y = mapI.imgHeight-90, .w = 80, .h = 80}, .Bcolor = white, .Tcolor = white, .str = "", .t=ICON, .power =false}
     };
 
-
+    /*ablak inicializálása*/
     sdl_init("Pathfinder", mapI.imgWidth+500, mapI.imgHeight, &window, &renderer);
     RenderMap(renderer, map);
     boxRGBA(renderer, mapI.imgWidth, 0, mapI.imgWidth + 500, mapI.imgHeight,  255, 255, 255, 255);
     RenderLogo(renderer);
 
+    /*font betöltése és statikus szöveg kiírása*/
     TTF_Init();
     TTF_Font *font = TTF_OpenFont("ProductSans-Regular.ttf", 25);
     Text info = {.to = {.x = mapI.imgWidth +  10, .y = 270, .w = 0, .h = 0}, .color = black, .str = "Forgalom mentesen az út hossza és ideje:"};
@@ -47,12 +50,16 @@ int main(int argc, char *argv[]) {
         SDL_Log("Nem sikerult megnyitni a fontot! %s\n", TTF_GetError());
         exit(1);
     }
+
+    /*gombok renderelése*/
     for (int i = 0; i < 3; i++)
     {
         RenderButtonWText(renderer,font, buttons[i]);
     }
 
     RenderButtonIcon(renderer, buttons[3], map);
+
+    /*fő eseményvezérlés*/
     bool quit = false;
     while (!quit) {
         SDL_Event event;
@@ -61,43 +68,44 @@ int main(int argc, char *argv[]) {
         switch (event.type) {
             /* egergomb elengedese */
             case SDL_MOUSEBUTTONUP:
-                if(event.button.button == SDL_BUTTON_RIGHT) {
+                if(event.button.button == SDL_BUTTON_RIGHT) { /*térkép állapotának resetje, kezdőállapotba helyezés jobb klikk felengedés hatására*/
                     State = FROM;
+                    buttons[GO].power = false;
                     RenderMap(renderer, map);
                     RenderButtonIcon(renderer, buttons[3], map);
                     boxRGBA(renderer, mapI.imgWidth, 310, mapI.imgWidth + 500, mapI.imgHeight-90,  255, 255, 255, 255);
                     SDL_RenderPresent(renderer);
                     InitPathfinding(&mainArray, &openSet, &closedSet);
                 }
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    if(event.button.x <= mapI.imgWidth && !CheckButtonClick(&buttons[ICON], &event)){
+                if (event.button.button == SDL_BUTTON_LEFT) { 
+                    if(event.button.x <= mapI.imgWidth && !CheckButtonClick(&buttons[ICON], &event)){ /*térképen bal klikk felengedés*/
                         switch (State)
                         {
                         case FROM:
-                            SelectNode(renderer, &event,&StartNode, &StartClick, &mainArray);
+                            SelectNode(renderer, &event,&StartNode, &StartClick, &mainArray); /*kezdőpont kiválasztása*/
                             State = TO;
                             break;
                         case TO:
-                            SelectNode(renderer, &event,&EndNode, &EndClick, &mainArray);
+                            SelectNode(renderer, &event,&EndNode, &EndClick, &mainArray); /*végpont kiválasztása*/
                             State = WAIT;
                             break;
                         default:
                             break;
                         }
                     }
-                    else if(CheckButtonClick(&buttons[SHORTEST], &event)){
+                    else if(CheckButtonClick(&buttons[SHORTEST], &event)){ /*"Legrövidebb út" bomb megnyomása*/
                         ButtonEffect(renderer, &buttons[SHORTEST], font);
                     }
-                    else if(CheckButtonClick(&buttons[FASTEST], &event)){
+                    else if(CheckButtonClick(&buttons[FASTEST], &event)){ /*"Leggyorsabb út" bomb megnyomása*/
                         ButtonEffect(renderer, &buttons[FASTEST], font);
                     }
-                    else if(CheckButtonClick(&buttons[GO], &event)&& State == WAIT){
+                    else if(CheckButtonClick(&buttons[GO], &event)&& State == WAIT){ /*"GO" bomb megnyomása*/
                         RenderMap(renderer, map);
                         boxRGBA(renderer, mapI.imgWidth, 310, mapI.imgWidth + 500, mapI.imgHeight-90,  255, 255, 255, 255);
                         filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
                         filledCircleRGBA(renderer, EndClick.x, EndClick.y, 4, 255, 0, 0, 255);
                         RenderButtonIcon(renderer, buttons[3], map);
-
+                        /*A gombbal kiválasztott (nem kizáró vagy) út kirajzolása */
                         if(buttons[SHORTEST].power){
                             SetStart(StartNode, EndNode, SHORTEST);
                             Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, SHORTEST);
@@ -120,7 +128,7 @@ int main(int argc, char *argv[]) {
                         buttons[GO].power =true;
                         RenderButtonIcon(renderer, buttons[3], map);
                     }
-                    else if(CheckButtonClick(&buttons[ICON], &event)){
+                    else if(CheckButtonClick(&buttons[ICON], &event)){ /*térkép nézet váltása (SAT = műholdas kép, NORM = sima térkép)*/
                         if(map == SAT){
                             map = NORM;
                         }
@@ -129,17 +137,17 @@ int main(int argc, char *argv[]) {
                         }
                         RenderMap(renderer, map);
                         RenderButtonIcon(renderer, buttons[3], map);
-                        switch (State)
+                        switch (State) /*hogy ne vesszenek el az eddig megjelenített pontok vagy útvonal újra kirajzoljuk állapottól függően*/
                         {
-                            case TO:
+                            case TO: /*ha csak 1 pont volt eddig kiválasztva*/
                                 filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
                                 SDL_RenderPresent(renderer);
                                 break;
-                            case WAIT:
+                            case WAIT: /*ha már mindkettő pont ki volt választva*/
                                 filledCircleRGBA(renderer, StartClick.x, StartClick.y, 4, 255, 0, 0, 255);
                                 filledCircleRGBA(renderer, EndClick.x, EndClick.y, 4, 255, 0, 0, 255);
                                 SDL_RenderPresent(renderer);
-                                if(buttons[GO].power){
+                                if(buttons[GO].power){ /*ha már az útvonal(ak) is ki volt(ak) rajzolva*/
                                     if(buttons[SHORTEST].power){
                                     SetStart(StartNode, EndNode, SHORTEST);
                                     Pathfinder(StartNode, EndNode, &openSet, &closedSet, mainArray.nodes, SHORTEST);
@@ -162,12 +170,12 @@ int main(int argc, char *argv[]) {
                                     RenderButtonIcon(renderer, buttons[3], map);
                                 }
                                 break;
-
+                            
                             default:
                                 break;
                         }
                     }
-                }
+                } 
                 break;
             /* ablak bezarasa */
             case SDL_QUIT:
@@ -175,7 +183,7 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-    FreeNodes(&mainArray);
+    FreeNodes(&mainArray); /*felszabadítások*/
     DeleteList(&openSet);
     DeleteList(&closedSet);
     TTF_CloseFont(font);

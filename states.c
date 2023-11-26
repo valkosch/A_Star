@@ -1,16 +1,16 @@
 #include "states.h"
 
-SDL_Color red = {.r= 255, .g = 0, .b=0, .a=255};
+SDL_Color red = {.r= 255, .g = 0, .b=0, .a=255}; /*globális színek*/
 SDL_Color blue = {.r= 0, .g = 0, .b=255, .a=255};
 SDL_Color black = {.r= 0, .g = 0, .b=0, .a=255};
 SDL_Color white = {.r= 255, .g = 255, .b=255, .a=255};
 SDL_Color grey = {.r = 211, .g = 211, .b = 211, .a=255};
 SDL_Color purple = {.r = 204, .g = 0, .b = 204, .a=255};
 
-bool CheckButtonClick(Button *bt, SDL_Event *ev){
+bool CheckButtonClick(Button *bt, SDL_Event *ev){ /*ellenőrzi hogy egy kattintás az adott gomb területén volt e és visszatér egy bool-lal*/
     return ((ev->button.x >= bt->to.x && ev->button.x <= (bt->to.x+bt->to.w))&&(ev->button.y >= bt->to.y && ev->button.y <= (bt->to.y+bt->to.h)));
 }
-void ButtonEffect(SDL_Renderer *renderer, Button *bt, TTF_Font *font){
+void ButtonEffect(SDL_Renderer *renderer, Button *bt, TTF_Font *font){ /*megváltoztatja a gombok külsejét, ezt akkor érdemes meghívni ha kattintottak a gombra*/
     SDL_Color tmp;
     switch (bt->t)
     {
@@ -39,26 +39,14 @@ void ButtonEffect(SDL_Renderer *renderer, Button *bt, TTF_Font *font){
         bt->power = true;
     }
 }
-void IconEffect(SDL_Renderer *renderer, Button bt, mapType *map){
-    if(*map == SAT){
-        RenderMap(renderer, NORM);
-        RenderButtonIcon(renderer, bt, SAT);
-        *map = NORM;
-    }
-    else{
-        RenderMap(renderer, SAT);
-        RenderButtonIcon(renderer, bt, NORM);
-        *map = SAT;
-    }
-}
-void SelectNode(SDL_Renderer *renderer,SDL_Event *event, Node **StartNode, Vector2 *tmp, NodeTomb *mainArray){
-    FindNearest_Node(event->button.x,event->button.y,mainArray, StartNode);
-    filledCircleRGBA(renderer, event->button.x, event->button.y, 4, 255, 0, 0, 255);
+void SelectNode(SDL_Renderer *renderer,SDL_Event *event, Node **StartNode, Vector2 *tmp, NodeTomb *mainArray){ /*elvégzi azokat a műveleteket amik egy pont kiválasztásánal szükségesek*/
+    FindNearest_Node(event->button.x,event->button.y,mainArray, StartNode); /*megtalálja a legközelebbi valós útkereszteződést*/
+    filledCircleRGBA(renderer, event->button.x, event->button.y, 4, 255, 0, 0, 255); /*piros pötty oda ahol a kattintás történt*/
     tmp->x = event->button.x;
     tmp->y = event->button.y;
     SDL_RenderPresent(renderer);   
 }
-void InitPathfinding(NodeTomb *mainArray, List *openSet, List *closedSet){
+void InitPathfinding(NodeTomb *mainArray, List *openSet, List *closedSet){ /*visszaállítja az egész pont tömböt kezdőértékeire, akkor szükséges ha 2x is szeretnénk utat számolni egymás után egy futás alatt*/
     for(int i = 0; i< mainArray->NodeNum; i++){
         NodeInit(&(mainArray->nodes[i]));
     }
