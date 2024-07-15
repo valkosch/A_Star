@@ -22,7 +22,7 @@ After that you can either use my provided binary to run the program in the termi
 ./astar
 ```
 
-Or you can build the binary by yourself. To do this first download the dependencies. On my Arch it goes like this, but I'm sure youcan find the same packages with your own package manager.
+Or you can build the binary by yourself. To do this first download the dependencies. On my Arch it goes like this, but I'm sure you can find the same packages with your own package manager.
 
 ```
 sudo pacman -S sdl2 sdl2_gfx sdl2_image sdl2_ttf
